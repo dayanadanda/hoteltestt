@@ -72,7 +72,16 @@ function ResultsContent() {
           </Link>
         )}
       </div>
-      {isLoading ? <ResultsListFallback /> : <HotelList />}
+      <div className="relative">
+        {isLoading && (
+          <div className="absolute inset-0 z-10 bg-white/80">
+            <ResultsListFallback />
+          </div>
+        )}
+        <div className={isLoading ? "pointer-events-none opacity-50" : ""}>
+          <HotelList />
+        </div>
+      </div>
     </div>
   );
 }
