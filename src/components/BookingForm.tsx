@@ -11,6 +11,21 @@ import type { BookingSummary as BookingSummaryType } from "@/types";
 
 const CONFIRMATION_STORAGE_KEY = "hotel_booking_confirmation";
 
+function generateConfirmationId(): string {
+  // Use secure randomness so each reservation gets a unique ID.
+  const c: Crypto | undefined = globalThis.crypto;
+  if (c && typeof c.getRandomValues === "function") {
+    if ("randomUUID" in c && typeof c.randomUUID === "function") {
+      return `BK-${c.randomUUID()}`;
+    }
+    const arr = new Uint32Array(2);
+    c.getRandomValues(arr);
+    return `BK-${arr[0].toString(16)}-${arr[1].toString(16)}`;
+  }
+
+  return `BK-${Date.now()}-${Math.floor(Math.random() * 1_000_000_000)}`;
+}
+
 function saveBookingToSession(booking: BookingSummaryType): void {
   if (typeof window === "undefined") return;
   try {
@@ -54,7 +69,7 @@ export function BookingForm({ hotel, searchParams }: BookingFormProps) {
       setErrors({});
       setIsSubmitting(true);
       try {
-        const confirmationId = `BK-${Date.now()}`;
+        const confirmationId = generateConfirmationId();
         const booking: BookingSummaryType = {
           hotel,
           searchParams,

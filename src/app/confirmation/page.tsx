@@ -6,6 +6,31 @@ import Image from "next/image";
 import { getConfirmationFromSession } from "@/components/BookingForm";
 import type { BookingSummary as BookingSummaryType } from "@/types";
 
+function parseYmdToUTC(dateStr: string): number | null {
+  // Expecting "YYYY-MM-DD" (from <input type="date" />).
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return null;
+  const [yStr, mStr, dStr] = parts;
+  const y = Number.parseInt(yStr, 10);
+  const m = Number.parseInt(mStr, 10);
+  const d = Number.parseInt(dStr, 10);
+  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return null;
+  // Use UTC to avoid DST-related day shifts.
+  return Date.UTC(y, m - 1, d);
+}
+
+function formatEuro(amount: number): string {
+  try {
+    return new Intl.NumberFormat("en-IE", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `€${amount}`;
+  }
+}
+
 function StarRating({ rating }: { rating: number }) {
   const full = Math.floor(rating);
   const hasHalf = rating % 1 >= 0.5;
@@ -50,6 +75,13 @@ export default function ConfirmationPage() {
   }
 
   const { hotel, searchParams, guestName, guestEmail, confirmationId } = booking;
+  const checkInUTC = parseYmdToUTC(searchParams.checkIn);
+  const checkOutUTC = parseYmdToUTC(searchParams.checkOut);
+  const nights =
+    checkInUTC !== null && checkOutUTC !== null
+      ? Math.max(0, Math.round((checkOutUTC - checkInUTC) / (1000 * 60 * 60 * 24)))
+      : 0;
+  const totalPrice = hotel.pricePerNight * nights;
 
   return (
     <div className="py-8">
@@ -82,32 +114,56 @@ export default function ConfirmationPage() {
             </div>
           </div>
         </div>
-        <dl className="mt-4 grid gap-2 border-t border-gray-100 pt-4 text-sm">
-          <div className="flex justify-between">
-            <dt className="text-gray-500">Check-in</dt>
-            <dd className="font-medium text-gray-900">{searchParams.checkIn}</dd>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <dl className="space-y-3 border-t border-gray-100 pt-4 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-gray-500">Check-in</dt>
+                <dd className="font-medium text-gray-900">{searchParams.checkIn}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-gray-500">Check-out</dt>
+                <dd className="font-medium text-gray-900">{searchParams.checkOut}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-gray-500">Total nights</dt>
+                <dd className="font-medium text-gray-900">{nights}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-gray-500">Guests</dt>
+                <dd className="font-medium text-gray-900">{searchParams.guests}</dd>
+              </div>
+            </dl>
+
+            <div className="mt-4 rounded-md bg-gray-50 p-3">
+              <p className="text-sm font-medium text-gray-600">Price per night</p>
+              <p className="mt-1 text-lg font-semibold text-gray-900">
+                {formatEuro(hotel.pricePerNight)}
+                <span className="text-sm font-normal text-gray-500"> / night</span>
+              </p>
+            </div>
           </div>
-          <div className="flex justify-between">
-            <dt className="text-gray-500">Check-out</dt>
-            <dd className="font-medium text-gray-900">{searchParams.checkOut}</dd>
+
+          <div className="space-y-4">
+            <dl className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-gray-500">Guest name</dt>
+                <dd className="font-medium text-gray-900">{guestName}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-gray-500">Email</dt>
+                <dd className="font-medium text-gray-900">{guestEmail}</dd>
+              </div>
+            </dl>
+
+            <div className="rounded-md bg-blue-50 p-3">
+              <p className="text-sm font-medium text-gray-600">Total price</p>
+              <p className="mt-1 text-xl font-bold text-gray-900">
+                {formatEuro(totalPrice)}
+              </p>
+            </div>
           </div>
-          <div className="flex justify-between">
-            <dt className="text-gray-500">Guests</dt>
-            <dd className="font-medium text-gray-900">{searchParams.guests}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-gray-500">Guest name</dt>
-            <dd className="font-medium text-gray-900">{guestName}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-gray-500">Email</dt>
-            <dd className="font-medium text-gray-900">{guestEmail}</dd>
-          </div>
-        </dl>
-        <p className="mt-4 text-lg font-semibold text-gray-900">
-          €{hotel.pricePerNight}{" "}
-          <span className="text-sm font-normal text-gray-500">/ night</span>
-        </p>
+        </div>
       </div>
 
       <div className="mt-8 text-center">
