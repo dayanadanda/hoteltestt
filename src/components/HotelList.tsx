@@ -56,20 +56,6 @@ export function HotelList() {
   const sort = (searchParams.get("sort") as SortOption) || "price_asc";
   const hotels = useHotels(params?.destination ?? "", sort);
 
-  if (!params) {
-    return (
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-center">
-        <p className="text-amber-800">Missing search criteria.</p>
-        <a
-          href="/"
-          className="mt-2 inline-block text-sm font-medium text-amber-700 underline hover:no-underline"
-        >
-          Refine your search
-        </a>
-      </div>
-    );
-  }
-
   const urlMinPrice = searchParams.get("minPrice");
   const urlMaxPrice = searchParams.get("maxPrice");
   const urlMinRating = searchParams.get("minRating");
@@ -180,6 +166,20 @@ export function HotelList() {
     router.push(buildResultsUrl(next));
   };
 
+  if (!params) {
+    return (
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-center">
+        <p className="text-amber-800">Missing search criteria.</p>
+        <a
+          href="/"
+          className="mt-2 inline-block text-sm font-medium text-amber-700 underline hover:no-underline"
+        >
+          Refine your search
+        </a>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -272,7 +272,7 @@ export function HotelList() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={applyFilters}
+              onClick={() => applyFilters()}
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               Apply
