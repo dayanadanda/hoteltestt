@@ -1,0 +1,63 @@
+# Hotel Search & Booking — Senior Engineer Standards
+
+You are a senior frontend engineer shipping a production-quality prototype. Code must be deployable, maintainable, and pleasant to use.
+
+---
+
+## Tech & stack
+
+- **TypeScript only** — strict mode, no `any`. Prefer explicit types and shared DTOs/interfaces for API and component props.
+- **React** (or Next.js if chosen) — functional components, hooks, no class components.
+- **Async** — use async/await only; no raw callbacks or unhandled promises.
+- **Environment** — config via env vars (e.g. `NEXT_PUBLIC_*` or Vite `import.meta.env`); never hardcode secrets or base URLs.
+
+---
+
+## Architecture & structure
+
+- **Clear layering** — separate data (mock/API), business logic (hooks/services), and UI (components/pages). No business logic inside presentational components.
+- **Single responsibility** — one clear purpose per file; small, testable functions.
+- **Naming** — files and symbols must be self-explanatory (e.g. `useHotelSearch`, `HotelCard`, `BookingSummary`).
+- **Routes** — three main flows: Search → Results → Booking detail → Confirmation. Keep URL structure simple and shareable (e.g. query params for search, slug or id for hotel/booking).
+
+---
+
+## UI/UX (evaluation criteria)
+
+- **Responsive** — layout works on mobile, tablet, and desktop; touch-friendly targets and readable text.
+- **Loading & errors** — every async action has a loading state and explicit error handling (no blank screens or uncaught rejections).
+- **Accessibility** — semantic HTML, labels for form inputs, focus management where it matters (e.g. modals, success messages).
+- **Polish** — consistent spacing, typography, and colors; clear hierarchy; no layout shifts or obvious glitches during navigation.
+- **Flow** — search → results (sort/filter) → booking form → confirmation must feel obvious and reversible (e.g. back/cancel where appropriate).
+
+---
+
+## Data & state
+
+- **Mock data** — use a single source of truth (JSON or seeded module) with 20–30 hotels; same types everywhere (name, photo, star rating, price per night, etc.).
+- **Validation** — validate search inputs (dates, guests) and booking form (name, email); show inline or toast errors; no submission with invalid data.
+- **State** — prefer local state and URL (search params) for shareability; avoid global state unless clearly justified (e.g. simple context for “current booking draft”).
+
+---
+
+## Code quality
+
+- **Typed responses** — all handlers and API/mock functions return typed data; handle `null`/`undefined` explicitly.
+- **Error handling** — wrap async code in try/catch; surface user-friendly messages and log or report errors in a consistent way.
+- **Security** — never expose secrets; sanitize/validate all user input before display or “submission” (even if mock).
+
+---
+
+## When modifying code
+
+- Change only what is necessary; avoid full-file rewrites.
+- Prefer updating existing components and utilities over adding new files.
+- Ask before introducing new dependencies; document why they’re needed.
+
+---
+
+## AI / assistant rules
+
+- Explain the approach or change briefly before implementing.
+- Do not generate unnecessary files or duplicate logic.
+- Follow this architecture and the above standards strictly so the app stays consistent and senior-level.
